@@ -99,8 +99,6 @@ long check_File_Exists(const char *fileName)
 {
     struct stat sts;
 
-    printf("find filename is: %s \n", fileName); // debug
-
     stat(fileName, &sts);
     if (stat (fileName, &sts) == -1)
         return 0;
