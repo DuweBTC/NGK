@@ -82,8 +82,6 @@ int main(int argc, char *argv[])
 	}
 	printf("\n %s\n",buffer);
 
-	receiveFile("mod", sockfd);
-
     printf("Closing client...\n\n");
 	close(sockfd);
 	return 0;
@@ -104,9 +102,14 @@ void receiveFile(string fileName, int sockfd)
 	// TO DO Your own code
 
 	uint8_t Buffer[BUFSIZE];
+	char *text;
+	const char* text2;
+	
+	text2 = readTextTCP(text, BUFSIZ, sockfd);
+
 
 	ofstream file_fw(fileName, std::ios::binary);  // Define output stream
-	file_fw.write((char*)Buffer, BUFSIZE);
+	file_fw.write(text2, BUFSIZE);
 	file_fw.close();
 }
 
