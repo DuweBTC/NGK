@@ -13,13 +13,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "iknlib.h"
+#include <sstream>
 
 using namespace std;
 #define BUFFSIZE 1000
 
-void sendFile(string fileName, long fileSize, int outToClient);
+void sendFile(std::string fileName, long fileSize, int outToClient);
 
-/**
+/*
  * main starter serveren og venter på en forbindelse fra en klient
  * Læser filnavn som kommer fra klienten.
  * Undersøger om filens findes på serveren.
@@ -108,10 +109,12 @@ int main(int argc, char *argv[])
 		{
 			snprintf(bufferTx, sizeof(bufferTx), "File does not exist");
 		} else {
-			sendFile(filename,fileSize, newsockfd);
+			char * p = reinterpret_cast<char *>(fileSize);
+			writeTextTCP(sockfd, p);
+			//sendFile(filename,fileSize, newsockfd);
 		}
 
-        cout << "filename is: " << filename << " filesize is: "<< fileSize << endl; // debug
+        std::cout << "filename is: " << filename << " filesize is: "<< fileSize << std::endl; // debug
 
 		snprintf(bufferTx, sizeof(bufferTx), "Got message: %s",buffer);
 
@@ -136,13 +139,14 @@ int main(int argc, char *argv[])
  * @param fileSize Størrelsen på filen, 0 hvis den ikke findes
  * @param outToClient Stream som der skrives til socket
      */
-void sendFile(string fileName, long fileSize, int outToClient)
+void sendFile(std::string fileName, long fileSize, int outToClient)
 {
-	char buffer[BUFSIZE];
+	// char buffer[BUFSIZE];
 
-	ifstream file_fr(fileName, std::ios::binary);  // Define input stream
-	file_fr.read((char*)buffer, BUFSIZE);  // Automatic seek!
-	writeTextTCP(outToClient, buffer);
-	file_fr.close();
+	// ifstream file_fr(fileName, std::ios::binary);  // Define input stream
+	// file_fr.read((char*)buffer, BUFSIZE);  // Automatic seek!
+	// writeTextTCP(outToClient, buffer);
+	// file_fr.close();
+
     
 }
