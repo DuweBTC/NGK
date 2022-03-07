@@ -11,6 +11,10 @@
 void uCommand(int newsocketfd);
 void lCommand(int newsocketfd);
 
+/*
+error handling function
+@param msg message to handle error messages
+*/
 void error(const char *msg)
 {
     perror(msg);
@@ -67,32 +71,37 @@ int main(int argc, char *argv[])
             error("ERROR reading from socket");
         }
 
+        printf("Message recived: %s\n",buffer);
+
+        // Runs function for handling U command
         if (buffer == "U" || "u")
         {
             uCommand(newsockfd);
         }
+        // Runs function for handling L command
         if (buffer == "L" || "l")
         {
             lCommand(newsockfd);
         }
-
-        printf("Here is the message: %s\n",buffer);
         
-        n = write(newsockfd,"I got your message",18);
+        //n = write(newsockfd,"I got your message",18);
         
         if (n < 0)
         {
             error("ERROR writing to socket");
         }
-
     }
-
 
     close(newsockfd);
     close(sockfd);
     return 0; 
 }
 
+
+/*
+* functions for reading uptime file, and sending it to UDP-client
+* @param newsocketfd socket adress for writing to client
+*/
 void uCommand(int newsockfd)
 {
     FILE* ptr;
@@ -111,6 +120,11 @@ void uCommand(int newsockfd)
     fclose(ptr);
 }
 
+/*
+*   functions for reading loadAvg file, and sending it to UDP-client
+*   
+* @param newsocketfd socket adress for writing to client
+*/
 void lCommand(int newsocketfd)
 {
     FILE* ptr;
