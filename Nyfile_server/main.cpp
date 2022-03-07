@@ -106,8 +106,9 @@ int main(int argc, char *argv[])
         fileSize = check_File_Exists(filename);
 		if (fileSize == 0)
 		{
-			snprintf(bufferTx, sizeof(bufferTx), "File does not exist");
+			snprintf(bufferTx, sizeof(bufferTx), "File does not exist\n");
 		} else {
+			printf("fandt filen\n");
 			sendFile(filename,fileSize, newsockfd);
 		}
 
@@ -138,11 +139,11 @@ int main(int argc, char *argv[])
      */
 void sendFile(string fileName, long fileSize, int outToClient)
 {
-	char buffer[BUFSIZE];
+	// char buffer[BUFSIZE];
 
-	ifstream file_fr(fileName, std::ios::binary);  // Define input stream
-	file_fr.read((char*)buffer, BUFSIZE);  // Automatic seek!
-	writeTextTCP(outToClient, buffer);
-	file_fr.close();
+	// ifstream file_fr(fileName, std::ios::binary);  // Define input stream
+	// file_fr.read((char*)buffer, BUFSIZE);  // Automatic seek!
+	// writeTextTCP(outToClient, buffer);
+	// file_fr.close();
 
 }
