@@ -19,24 +19,39 @@
 
 void sendFile(char* fileName, long fileSize, int outToClient)
 {
+	//Opening a fie type fstream 
     std::fstream file;
+	
+	//A way to make a char * to string data
 	std::string fileName2 = "";
 		for (int i = 0; i <= sizeof(fileName)+1; i++){
 			fileName2 += fileName[i];
-		}
+		}	
+
 	//File location
-	printf("Reading the file\n");
-	int n = read(outToClient,fileName,sizeof(fileName));
+	//Is the local folder, but inside a file folder with the specifyed name
 	std::string filepath = ".//file//" + fileName2;
 	std::cout << filepath << std::endl;
+
+	//Operataion to open the file and read it as binary
 	file.open(filepath, std::ios::in | std::ios::binary);
 	
+	//Check if file is open
 	if(file.is_open()){
 		printf("File is ready to transmit\n");
 	} else {
 		printf("File loading failed\n");
 		exit(1);
 	}
+
+	// Read from file - How do is now the path here?
+	//("Reading the file\n");
+	//int n = read(outToClient,fileName,sizeof(fileName));
+	//if (n < 0){
+	//		printf("ERROR reading from file");
+	//		exit(1);
+	//	}
+	//		printf("Successful reading for file");
 
 	//Transmit file
 	std::string contents((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -118,8 +133,7 @@ int main(int argc, char *argv[])
 			printf("ERROR writing to socket");
 			exit(1);
 		}
-		
-		
+
 	
 		sendFile(buffer, sizeof(n), newsockfd);
 		
