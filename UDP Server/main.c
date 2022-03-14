@@ -14,7 +14,7 @@ void uCommand(); // function for handling u command
 void lCommand(); // function for handling l command
 
 /* Global variables used in the program */
-int sockfd, newsockfd, portno;
+int sockfd, newsockfd;
 
 /*
 * error handling function
@@ -62,11 +62,12 @@ int main(int argc, char *argv[])
 void setupUDP(char *argv[])
 {
     struct sockaddr_in serv_addr;
+    int portno;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     { 
-        error("ERROR opening socket");
+        error("ERROR, Kunnet ikke åbne socket");
     }
 
     int reuse = 1;
@@ -79,7 +80,7 @@ void setupUDP(char *argv[])
     serv_addr.sin_port = htons(portno);
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
     {
-        error("ERROR on binding");
+        error("ERROR, Kunne ikke binde");
     }
 }
 
@@ -96,7 +97,7 @@ void listner()
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) 
     {
-        error("ERROR on accept");
+        error("ERROR, Fejl ved accept");
     }
 }
 
@@ -112,7 +113,7 @@ void reader()
     n = read(newsockfd,buffer,255);
     if (n < 0) 
     {
-        error("ERROR reading from socket");
+        error("ERROR, Kunne ikke læse fra socket");
     }
     buffer[strcspn(buffer, "\n")] = 0;
     printf("Kommando modtaget: %s\n",buffer);
@@ -129,7 +130,7 @@ void reader()
 
     if (n < 0)
     {
-        error("ERROR writing to socket");
+        error("ERROR, Kunne ikke skrive til socket");
     } 
 }
 
