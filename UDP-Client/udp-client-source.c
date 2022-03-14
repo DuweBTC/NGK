@@ -47,20 +47,13 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(portno);
     server_addr.sin_addr = *((struct in_addr *)server->h_addr);
     bzero(&(server_addr.sin_zero),8);
- 
-    printf("\nFor at afslutte indtast Q eller q");
     printf("\nFor at få server uptime indtast U\nFor at få server loadavg indtast L\n");
     
     while (1)
     {    
         fgets(send_data,255,stdin);
  
-        if ((strcmp(send_data , "q") == 0) || strcmp(send_data , "Q") == 0)
-        {
-            break;
-        } else {
-            sendto(sock, send_data, strlen(send_data), 0,(struct sockaddr *)&server_addr, sizeof(struct sockaddr));
-        }
+        sendto(sock, send_data, strlen(send_data), 0,(struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 
         int bytes_read = recvfrom(sock, send_data, 255, 0,(struct sockaddr *)&server_addr,sizeof(struct sockaddr));
         
