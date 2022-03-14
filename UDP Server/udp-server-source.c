@@ -16,7 +16,7 @@
 #include <stdlib.h>
 
 char data[BUFSIZ];
- int i = 0;
+int i = 0;
 
 void uCommand();
 void lCommand();
