@@ -1,3 +1,7 @@
+/*
+* For at bygge brug følgende kommando i terminalen
+* gcc -o udp-client udp-client-source.c
+*/
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -44,12 +48,11 @@ int main(int argc, char *argv[])
     server_addr.sin_addr = *((struct in_addr *)server->h_addr);
     bzero(&(server_addr.sin_zero),8);
  
+    printf("\nFor at afslutte indtast Q eller q");
+    printf("\nFor at få server uptime indtast U\nFor at få server loadavg indtast L\n");
+    
     while (1)
-    {
-
-        printf("\nFor at afslutte indtast Q eller q");
-        printf("\nFor at få server uptime indtast U\nFor at få server loadavg indtast L\n");
-        
+    {    
         fgets(send_data,255,stdin);
  
         if ((strcmp(send_data , "q") == 0) || strcmp(send_data , "Q") == 0)
@@ -61,7 +64,7 @@ int main(int argc, char *argv[])
 
         int bytes_read = recvfrom(sock, send_data, 255, 0,(struct sockaddr *)&server_addr,sizeof(struct sockaddr));
         
-        printf("Besked fra server: %s", send_data);
+        printf("\nBesked fra server: %s\n\n", send_data);
 
         memset(send_data, 0, sizeof(send_data)); // Tømmer send_data array
     }
