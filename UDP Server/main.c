@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 	addr_len = sizeof(struct sockaddr);
 	
-	printf("\nUDPServer Waiting for client on port %d", portno);
+	printf("\nUDP server køre, venter på client på port: %d", portno);
 	fflush(stdout);
 
 	while (1)
@@ -55,21 +55,19 @@ int main(int argc, char *argv[])
 		//recv_data[bytes_read] = '\0';
 		recv_data[strcspn(recv_data, "\n")] = 0;
 
-		printf("\n(%s , %d) said : ",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-		printf("%s", recv_data);
+		printf("\nBesked modtaget fra (%s , %d) ",inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+		printf("\nBeskeden modtaget: %s", recv_data);
 
 		if (strcmp(recv_data, "u") == 0 || strcmp(recv_data, "U") == 0)
 		{
 			uCommand();
-			printf(" Uptime = %s", data);
 			sendto(sock, data, i-2, 0, (struct sockaddr *)&client_addr, sizeof(struct sockaddr));
 		} else if ( strcmp(recv_data, "l") == 0 || strcmp(recv_data, "L") == 0)
 		{
 			lCommand();
-			printf("loadAVG = %d", data);
 			sendto(sock, data, i-2, 0, (struct sockaddr *)&client_addr, sizeof(struct sockaddr));
 		} else {
-			sendto(sock, "No command", 10, 0, (struct sockaddr *)&client_addr, sizeof(struct sockaddr));
+			sendto(sock, "Ukendt kommando", 15, 0, (struct sockaddr *)&client_addr, sizeof(struct sockaddr));
 		}
 		
 		fflush(stdout);
