@@ -15,8 +15,6 @@ void lCommand(); // function for handling l command
 
 /* Global variables used in the program */
 int sockfd, newsockfd, portno;
-struct sockaddr_in serv_addr, cli_addr;
-socklen_t clilen;
 
 /*
 * error handling function
@@ -63,7 +61,7 @@ int main(int argc, char *argv[])
 */
 void setupUDP(char *argv[])
 {
-    struct sockaddr_in serv_addr, cli_addr;
+    struct sockaddr_in serv_addr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -90,6 +88,9 @@ void setupUDP(char *argv[])
 */
 void listner()
 {
+    struct sockaddr_in cli_addr;
+    socklen_t clilen;
+
     listen(sockfd,5);
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
@@ -113,18 +114,17 @@ void reader()
     {
         error("ERROR reading from socket");
     }
+    buffer[strcspn(buffer, "\n")] = 0;
+    printf("Kommando modtaget: %s\n",buffer);
 
-    printf("Message recived: %s\n",buffer);
-
-    // Runs function for handling U command
-    if (buffer == "U" || "u")
+    if (strcmp(buffer, "U") == 0 || strcmp(buffer, "u") == 0)
     {
         uCommand(newsockfd);
-    }
-    // Runs function for handling L command
-    if (buffer == "L" || "l")
+    } else if (strcmp(buffer, "L") == 0 || strcmp(buffer, "l") == 0) 
     {
         lCommand(newsockfd);
+    } else {
+        write(newsockfd, "No such command", 15);
     }
 
     if (n < 0)
