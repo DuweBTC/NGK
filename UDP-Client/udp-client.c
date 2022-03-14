@@ -44,7 +44,7 @@ void openFunc(char *argv[])
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) 
     {
-        error("ERROR opening socket");
+        error("ERROR, Kunne ikke åbne socket");
     }
 }
 
@@ -56,7 +56,7 @@ void connectFunc(char *argv[])
     server = gethostbyname(argv[1]);
     if (server == NULL) 
     {
-        fprintf(stderr,"ERROR, no such host\n");
+        fprintf(stderr,"ERROR, Ingen host blev fundet\n");
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -65,7 +65,7 @@ void connectFunc(char *argv[])
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
     {
-        error("ERROR connecting");
+        error("ERROR, Kunne ikke forbinde");
     }
 }
 
@@ -79,7 +79,7 @@ void writerFunc()
     n = write(sockfd,buffer,strlen(buffer));
     if (n < 0)
     { 
-         error("ERROR writing to socket");
+        error("ERROR, Fejl ved skrivning til socket");
     }
 }
 
@@ -90,7 +90,7 @@ void readerFunc()
     n = read(sockfd,buffer,255);
     if (n < 0)
     {
-         error("ERROR reading from socket");
+        error("ERROR, Kunne ikke læse fra socket");
     }
     printf("%s\n",buffer);
 }
