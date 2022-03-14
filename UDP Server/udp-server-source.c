@@ -1,5 +1,10 @@
 /* udpserver.c */ 
 
+/* 
+* for at bygge programmet brug følgende kommando i terminal
+* gcc -o udp-server udp-server-source.c
+*/
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
