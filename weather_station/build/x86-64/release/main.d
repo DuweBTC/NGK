@@ -57,6 +57,15 @@ build/x86-64/release/build/x86-64/release/main.o: main.cpp \
  ../../restinio/path2regex/path2regex.hpp \
  ../../restinio/router/std_regex_engine.hpp \
  ../../restinio/router/method_matcher.hpp \
+ ../../restinio/websocket/websocket.hpp \
+ ../../restinio/websocket/message.hpp \
+ ../../restinio/utils/impl/bitops.hpp \
+ ../../restinio/websocket/impl/ws_connection_base.hpp \
+ ../../restinio/websocket/impl/ws_connection.hpp \
+ ../../restinio/websocket/impl/ws_parser.hpp \
+ ../../restinio/websocket/impl/ws_protocol_validator.hpp \
+ ../../restinio/websocket/impl/utf8.hpp ../../restinio/utils/base64.hpp \
+ ../../restinio/utils/base64_lut.ipp ../../restinio/utils/sha1.hpp \
  ../../../json_dto/dev/json_dto/pub.hpp \
  ../../../rapidjson/include/rapidjson/document.h \
  ../../../rapidjson/include/rapidjson/reader.h \

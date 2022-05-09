@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> Title SWNGK </title>
+        <meat charset="uft-8">
+            <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/js/tabulator.min.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/3.5.3/css/tabulator.min.css"></link>
+        <script type = "text/javascript">
+            function setTable(data){
+                $("#table").tabulator({
+                layout: "fitDataFill",
+                height: "311px",
+                columns: [
+                {
+                title: "Id",
+                field: "id"
+                },
+                {
+                title: "Date",
+                field: "date"
+                },
+                {
+                title: "Time",
+                field: "time"
+                },
+                {
+                title: "Place",
+                field: "place.name"
+                },
+                {
+                title: "Place",
+                field: "place.lat"
+                },
+                {
+                title: "Place",
+                field: "place.lon"
+                },
+                {
+                title: "Temperature",
+                field: "temperature"
+                },
+                {
+                title: "Humidity",
+                field: "humidity"
+                }
+                ],
+                });
+                $("#table").tabulator("setData", data);
+            }
+
+            function getData() {
+                axios.get('http://localhost:8080')
+                .then(response => {
+                setTable(response.data);
+                }).catch(error => alert('Try again'));
+                }
+
+            function sendData() {
+                axios.post('http://localhost:8080',
+                {
+                "id": document.getElementById("id").value,
+                "date": document.getElementById("date").value,
+                "time": document.getElementById("time").value,
+                "place": { 
+                    "placename": document.getElementById("placename").value,
+                    "lat": document.getElementById("lat").value,
+                    "lon": document.getElementById("lon").value 
+                    },
+                "temperature": document.getElementById("temperature").value,
+                "humidity": document.getElementById("humidity").value
+                })
+                then(response => {
+                }).catch(error => alert('Try again'));
+            } 
+
+            function updateData(idnumber)
+            {
+            var url='http://localhost:8080/'+ idenumber
+            axios.put(url,
+            {
+                "id": (document.getElementById("id").value),
+                "date": (document.getElementById("date").value),
+                "time": (document.getElementById("time").value) ,
+                "place": { 
+                    "placeName": document.getElementById("placeName").value ,
+                    "lat": document.getElementById("lat").value ,
+                    "lon": document.getElementById("lon").value 
+                    },
+                "temperature": (document.getElementById("temperature").value),
+                "humidity": (document.getElementById("humidity").value)
+                }
+                )
+                .then(response => {
+                }).catch(error => alert('Try again'));
+            }
+        </script>
+
+
+
+    </head>
+    <body>
+        <h1>Heading h1: Weather Station </h1>
+        <h2>heading h2: web client</h2>
+        <input type="submit” type=”Get data from Server">
+        <p>Id:</label><input id="id" type="text"></p>
+        <p>Date:</label><input id="date" type="text"></p>
+        <p>Time:</label><input id="time" type="text"></p>
+        <p>PlaceName:</label><input id="placename" type="text"></p>
+        <p>Latitude:</label><input id="lat" type="number"></p>
+        <p>Longtitude:</label><input id="lon" type="number"></p>
+        <p>Temperature:</label><input id="temperature" type="number"></p>
+        <p>Humidity:</label><input id="humidity" type="number"></p>
+        <input type="submit” type=”Send to Server">
+    </body>
+
+    x
+</html>

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <restinio/all.hpp>
-
+#include <restinio/websocket/websocket.hpp>
 #include <json_dto/pub.hpp>
 
 struct place_t
@@ -65,6 +65,16 @@ using weather_struct = std::vector<weather_t>;
 
 namespace rr = restinio::router;
 using router_t = rr::express_router_t<>;
+
+namespace rws = restinio::websocket::basic;
+
+using traits_t =
+			restinio::traits_t<
+				restinio::asio_timer_manager_t,
+				restinio::single_threaded_ostream_logger_t,
+				router_t>;
+// Alias for container with stored websocket handles.
+using ws_registry_t = std::map< std::uint64_t, rws::ws_handle_t >;
 
 class weather_handler_t
 {
@@ -306,6 +316,39 @@ public:
 		return resp.done();
 	}
 
+	auto on_live_update(const restinio::request_handle_t& req, rr::route_params_t params)
+	{
+		if (restinio::http_connection_header_t::upgrade == req->header().connection())
+		{
+			auto wsh = rws::upgrade<traits_t>(*req, rws::activation_t::immediate,[this](auto wsh, auto m)
+			{
+				if( rws::opcode_t::text_frame == m->opcode() ||	rws::opcode_t::binary_frame == m->opcode() ||rws::opcode_t::continuation_frame == m->opcode() )
+				{
+					wsh->send_message( *m );
+				}
+					else if( rws::opcode_t::ping_frame == m->opcode() )
+				{
+					auto resp = *m;
+					resp.set_opcode( rws::opcode_t::pong_frame );
+					wsh->send_message( resp );
+				}
+				else if( rws::opcode_t::connection_close_frame == m->opcode() )
+				{
+					register->erase( wsh->connection_id() );
+				}
+
+			});
+		m_registry.emplace(wsh->connection_id(), wsh);
+
+		init_resp(req->create_response()).done();
+
+		return restinio::request_accepted();
+
+		}
+
+	return restinio::request_rejected();
+	}
+
 private:
 	weather_struct &m_weather;
 
@@ -350,6 +393,7 @@ auto server_handler(weather_struct &weather_data)
 	// Handlers for '/' path.
 	router->http_get("/", by(&weather_handler_t::on_weather_list));
 	router->http_post("/", by(&weather_handler_t::on_new_weather));
+	router->http_get("/chat", by(&weather_handler_t::on_live_update));
 
 	// Disable all other methods for '/'.
 	router->add_handler(
@@ -393,6 +437,8 @@ auto server_handler(weather_struct &weather_data)
 		R"(/:weathernum(\d+))", method_not_allowed);
 
 	return router;
+
+	
 }
 
 int main()
@@ -413,6 +459,7 @@ int main()
 			{"3", "20211105", "14:15", {"Aarhus N", 13692, 19.438}, 14.1, 65},
 		};
 
+		
 		restinio::run(
 			restinio::on_this_thread<traits_t>()
 				.address("localhost")
