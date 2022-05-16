@@ -18,11 +18,76 @@
                 //Sending a message to the web socket server...
                 socket.send('Hello Server!');
             });
+
             //Listen for messages
             socket.addEventListener('message', function (message) {
                 document.getElementById("wsupdate").innerHTML = message.data;
             });
+            // The listen for messages gives errors 
 
+            //Listen for messages me me
+            socket.addEventListener('message', sendData());
+            socket.addEventListener('message', getData());
+
+            // Works fine even without any of the socket.addEventListener
+            function getData() {
+                axios.get('http://localhost:8080')
+                    .then(response => {
+                        setTable(response.data);
+                    }).catch(error => alert('Try again'));
+            }
+
+            // I get a badrequest in the browser information and I have change placename to placeName, because of the structs place_t format
+            function sendData() {
+                axios.post('http://localhost:8080',
+                    {
+                        "id": document.getElementById("id").value,
+                        "date": document.getElementById("date").value,
+                        "time": document.getElementById("time").value,
+                        "place": {
+                            "placeName": document.getElementById("placeName").value,
+                            "lat": document.getElementById("lat").valueAsNumber,
+                            "lon": document.getElementById("lon").valueAsNumber
+                        },
+                        "temperature": document.getElementById("temperature").valueAsNumber,
+                        "humidity": document.getElementById("humidity").valueAsNumber
+                    })
+                then(response => {
+                }).catch(error => alert('Try again'));
+            }
+
+            // Can't get it to take a parameter, but first I need to fix POST methode
+            function updateData(idnumber) {
+                var url = 'http://localhost:8080/' + idenumber
+                axios.put(url,
+                    {
+                        "id": (document.getElementById("id").value),
+                        "date": (document.getElementById("date").value),
+                        "time": (document.getElementById("time").value),
+                        "place": {
+                            "placeName": document.getElementById("placeName").value,
+                            "lat": document.getElementById("lat").valueAsNumber,
+                            "lon": document.getElementById("lon").valueAsNumber
+                        },
+                        "temperature": (document.getElementById("temperature").valueAsNumber),
+                        "humidity": (document.getElementById("humidity").valueAsNumber)
+                    }
+                )
+                    .then(response => {
+                    }).catch(error => alert('Try again'));
+            }
+
+            //Get 3 newest data, but get error 501 not implemented 
+            function getDataThree() {
+                axios.get('http://localhost:8080/list')
+                    .then(response => {
+                        setTable(response.data);
+                    }).catch(error => alert('Try again'));
+            }
+
+            //https://www.appsloveworld.com/display-json-data-in-html-table-using-javascript-dynamically/
+            // How do I use the dynamic tabluar function? 
+            // Do I just c('message', sendData());all it and then it should work, but it doesn't show anything 
             function setTable(data) {
                 $("#table").tabulator({
                     layout: "fitDataFill",
@@ -63,60 +128,9 @@
                     ],
                 });
                 $("#table").tabulator("setData", data);
+
             }
 
-            function getData() {
-                axios.get('http://localhost:8080')
-                    .then(response => {
-                        setTable(response.data);
-                    }).catch(error => alert('Try again'));
-            }
-
-            function sendData() {
-                axios.post('http://localhost:8080',
-                    {
-                        "id": document.getElementById("id").value,
-                        "date": document.getElementById("date").value,
-                        "time": document.getElementById("time").value,
-                        "place": {
-                            "placeName": document.getElementById("placeName").value,
-                            "lat": document.getElementById("lat").value,
-                            "lon": document.getElementById("lon").value
-                        },
-                        "temperature": document.getElementById("temperature").value,
-                        "humidity": document.getElementById("humidity").value
-                    })
-                then(response => {
-                }).catch(error => alert('Try again'));
-            }
-
-            function updateData(idnumber) {
-                var url = 'http://localhost:8080/' + idenumber
-                axios.put(url,
-                    {
-                        "id": (document.getElementById("id").value),
-                        "date": (document.getElementById("date").value),
-                        "time": (document.getElementById("time").value),
-                        "place": {
-                            "placeName": document.getElementById("placeName").value,
-                            "lat": document.getElementById("lat").value,
-                            "lon": document.getElementById("lon").value
-                        },
-                        "temperature": (document.getElementById("temperature").value),
-                        "humidity": (document.getElementById("humidity").value)
-                    }
-                )
-                    .then(response => {
-                    }).catch(error => alert('Try again'));
-            }
-
-            //Get 3 newest data
-            function getDataThree() {
-                axios.get('http://localhost:8080/list')
-                    .then(response => {
-                        setTable(response.data);
-                    }).catch(error => alert('Try again'));
-            }
 
         </script>
 
@@ -125,22 +139,25 @@
 </head>
 
 <body>
-    <form>
-        <h1>Weather Station </h1>
-        <h2>web client</h2>
-        <input type="button" id="Get data from Server" name="Get data from Server">
-        <p>Id:</label><input id="id" type="text"></p>
-        <p>Date:</label><input id="date" type="text"></p>
-        <p>Time:</label><input id="time" type="text"></p>
-        <p>Placename:</label><input id="placeName" type="text"></p>
-        <p>Latitude:</label><input id="lat" type="number"></p>
-        <p>Longtitude:</label><input id="lon" type="number"></p>
-        <p>Temperature:</label><input id="temperature" type="number"></p>
-        <p>Humidity:</label><input id="humidity" type="number"></p>
-        <input type="submit" name="Send to Server" id="SendtoServer">
-    </form>
+
+    <h1>Weather Station </h1>
+    <h2>web client</h2>
+    <input type="button" onclick='getData()'' value="Get data" />
+    <p>Id:</label><input id="id" type="text"></p>
+    <p>Date:</label><input id="date" type="text"></p>
+    <p>Time:</label><input id="time" type="text"></p>
+    <p>Placename:</label><input id="placeName" type="text"></p>
+    <p>Latitude:</label><input id="lat" type="number"></p>
+    <p>Longtitude:</label><input id="lon" type="number"></p>
+    <p>Temperature:</label><input id="temperature" type="number"></p>
+    <p>Humidity:</label><input id="humidity" type="number"></p>
+
+    <!-- Things is the way it was implemented on the sildes, 
+         but does it need a form tag. The getData() works fine.  -->
+    <input type="button" onclick="sendData()" value="Send data" />
     </br>
     </br>
+    <div id="table"></div> 
 
 </body>
 

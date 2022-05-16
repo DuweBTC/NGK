@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <restinio/all.hpp>
 #include <restinio/websocket/websocket.hpp>
 #include <json_dto/pub.hpp>
@@ -96,18 +95,7 @@ public:
 			"Weather Station (days count: " +
 			std::to_string(m_weather.size()) + ")\n");
 
-		for (std::size_t i = 0; i < m_weather.size(); ++i)
-		{
-			resp.append_body(std::to_string(i + 1) + ". ");
-			const auto &b = m_weather[i];
-			resp.append_body("ID: " + b.m_id + "\n Time: " + b.m_date + "  " + b.m_time + "\n"
-																						  "Place: " +
-							 b.m_place.m_placeName + " " +
-							 std::to_string(b.m_place.m_lat) + " " + std::to_string(b.m_place.m_lon) + "\n Temperature: " + std::to_string(b.m_temperature) +
-							 "\n Humidity: " + std::to_string(b.m_humidity) + "% \n "
-
-			);
-		}
+		resp.set_body(json_dto::to_json(m_weather));
 
 		return resp.done();
 	}
@@ -137,42 +125,6 @@ public:
 
 		return resp.done();
 	}
-	/*
-	//Implementation of id
-	auto on_id_get(
-		const restinio::request_handle_t &req, rr::route_params_t params)
-	{
-		auto resp = init_resp(req->create_response());
-		try
-		{
-			auto id = restinio::utils::unescape_percent_encoding(params["id"]);
-
-			resp.set_body("Weather of " + id + ":\n");
-
-			for (std::size_t i = 0; i < m_weather.size(); ++i)
-			{
-				const auto &b = m_weather[i];
-				if (id == b.m_id)
-				{
-					resp.append_body(std::to_string(i + 1) + ". ");
-					resp.append_body("ID: " + b.m_id + "\n Time: " + b.m_date + "  " + b.m_time + "\n"
-																								  "Place: " +
-									 b.m_place.m_placeName + " " +
-									 std::to_string(b.m_place.m_lat) + " " + std::to_string(b.m_place.m_lon) + "\n Temperature: " + std::to_string(b.m_temperature) +
-									 "\n Humidity: " + std::to_string(b.m_humidity) + "% \n "
-
-					);
-				}
-			}
-		}
-		catch (const std::exception &)
-		{
-			mark_as_bad_request(resp);
-		}
-
-		return resp.done();
-	}
-	*/
 
 	// Implemtation of get date
 	auto on_list_get(
@@ -190,15 +142,7 @@ public:
 					i = 0;
 
 				const auto &b = m_weather[i];
-
-				resp.append_body(std::to_string(i + 1) + ". ");
-				resp.append_body("ID: " + b.m_id + "\n Time: " + b.m_date + "  " + b.m_time + "\n"
-																							  "Place: " +
-								 b.m_place.m_placeName + " " +
-								 std::to_string(b.m_place.m_lat) + " " + std::to_string(b.m_place.m_lon) + "\n Temperature: " + std::to_string(b.m_temperature) +
-								 "\n Humidity: " + std::to_string(b.m_humidity) + "% \n "
-
-				);
+				resp.append_body(json_dto::to_json(m_weather[i]) + "\n");
 			}
 		}
 		catch (const std::exception &)
@@ -225,14 +169,8 @@ public:
 				const auto &b = m_weather[i];
 				if (date == b.m_date)
 				{
-					resp.append_body(std::to_string(i + 1) + ". ");
-					resp.append_body("ID: " + b.m_id + "\n Time: " + b.m_date + "  " + b.m_time + "\n"
-																								  "Place: " +
-									 b.m_place.m_placeName + " " +
-									 std::to_string(b.m_place.m_lat) + " " + std::to_string(b.m_place.m_lon) + "\n Temperature: " + std::to_string(b.m_temperature) +
-									 "\n Humidity: " + std::to_string(b.m_humidity) + "% \n "
-
-					);
+					resp.append_body(std::to_string(i + 1) + ". \n");
+					resp.append_body(json_dto::to_json(m_weather[i]) + "\n");
 				}
 			}
 		}
@@ -323,20 +261,20 @@ public:
 		{
 			auto wsh = rws::upgrade<traits_t>(*req, rws::activation_t::immediate, [this](auto wsh, auto m)
 											  {
-												  if (rws::opcode_t::text_frame == m->opcode() || rws::opcode_t::binary_frame == m->opcode() || rws::opcode_t::continuation_frame == m->opcode())
-												  {
-													  wsh->send_message(*m);
-												  }
-												  else if (rws::opcode_t::ping_frame == m->opcode())
-												  {
-													  auto resp = *m;
-													  resp.set_opcode(rws::opcode_t::pong_frame);
-													  wsh->send_message(resp);
-												  }
-												  else if (rws::opcode_t::connection_close_frame == m->opcode())
-												  {
-													  m_registry.erase(wsh->connection_id());
-												  } });
+				if (rws::opcode_t::text_frame == m->opcode() || rws::opcode_t::binary_frame == m->opcode() || rws::opcode_t::continuation_frame == m->opcode())
+				{
+					wsh->send_message(*m);
+				}
+				else if (rws::opcode_t::ping_frame == m->opcode())
+				{
+					auto resp = *m;
+					resp.set_opcode(rws::opcode_t::pong_frame);
+					wsh->send_message(resp);
+				}
+				else if (rws::opcode_t::connection_close_frame == m->opcode())
+				{
+					m_registry.erase(wsh->connection_id());
+				} });
 			m_registry.emplace(wsh->connection_id(), wsh);
 
 			init_resp(req->create_response()).done();
@@ -368,7 +306,7 @@ private:
 		resp
 			.append_header("Server", "RESTinio sample server /v.0.6")
 			.append_header_date_field()
-			.append_header("Content-Type", )
+			.append_header("Content-Type", "application/json")
 			.append_header(restinio::http_field::access_control_allow_origin, "*");
 		return resp;
 	}
@@ -408,13 +346,18 @@ auto server_handler(weather_struct &weather_data)
 	// Handlers for '/' path.
 	router->http_get("/", by(&weather_handler_t::on_weather_list));
 	router->http_post("/", by(&weather_handler_t::on_new_weather));
+
+	// Handlers for '/chat' path.
 	router->http_get("/chat", by(&weather_handler_t::on_live_update));
 
 	// Disable all other methods for '/'.
 	router->add_handler(
 		restinio::router::none_of_methods(
-			restinio::http_method_get(), restinio::http_method_post()),
+			restinio::http_method_get(), restinio::http_method_post(), restinio::http_method_options()),
 		"/", method_not_allowed);
+
+	// Routing for Options (CORS) :
+	router->add_handler(restinio::http_method_options(), "/", by(&weather_handler_t::options));
 
 	// Handler for '/date/:date' path.
 	router->http_get("/date/:date", by(&weather_handler_t::on_date_get));
@@ -427,13 +370,10 @@ auto server_handler(weather_struct &weather_data)
 	// Handler for '/list/' path.
 	router->http_get("/list/", by(&weather_handler_t::on_list_get));
 
-	// Disable all other methods for '/list/:list'.
+	//  Disable all other methods for '/list/:list'.
 	router->add_handler(
 		restinio::router::none_of_methods(restinio::http_method_get()),
 		"/list/", method_not_allowed);
-
-	// Routing for Options (CORS) :
-	router->add_handler(restinio::http_method_options(), "/", by(&weather_handler_t::options));
 
 	// Handlers for '/:weathernum' path.
 	router->http_get(
@@ -470,9 +410,9 @@ int main()
 				router_t>;
 
 		weather_struct weather_data{
-			{"1", "20211105", "12:15", {"Aarhus N", 13692, 19.438}, 13.1, 70},
-			{"2", "20211105", "13:15", {"Aarhus N", 13692, 19.438}, 15.1, 60},
-			{"3", "20211105", "14:15", {"Aarhus N", 13692, 19.438}, 14.1, 65},
+			{"1", "20211105", "12:15", {"Aarhus N", 13.692, 19.438}, 13.1, 70},
+			{"2", "20211105", "13:15", {"Aarhus N", 13.692, 19.438}, 15.1, 60},
+			{"3", "20211105", "14:15", {"Aarhus N", 13.692, 19.438}, 14.1, 65},
 		};
 
 		restinio::run(
